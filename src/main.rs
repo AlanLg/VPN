@@ -21,19 +21,17 @@ async fn main() -> std::io::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // Créez le device ici
     let cfg = DeviceConfig::default()
         .listen_port(51820)
         .private_key(local_private_key())
         .peer(
             PeerConfig::default()
-                .public_key(peer_public_key())
+                .public_kyey(peer_public_key())
                 .allowed_ip("10.0.0.1".parse::<Cidr>().unwrap()),
         );
     let tun = StubTun::new();
     let device = Arc::new(Device::with_udp(tun, cfg).await.unwrap());
 
-    // Définissez les routes Actix Web ici
     HttpServer::new(move || {
         App::new()
             .data(device.clone())
