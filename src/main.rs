@@ -1,10 +1,8 @@
-use std::sync::Arc;
-
 use actix_web::{App, HttpServer, web};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use std::sync::Arc;
 use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
-
-use vpn::controller::admin_controller::hello;
+use vpn::controller::admin_controller::{get_all_peers, hello};
 use vpn::utils::base64utils::{local_private_key, peer_public_key};
 use vpn::utils::tunneling_utils::StubTun;
 
@@ -29,17 +27,16 @@ async fn main() -> std::io::Result<()> {
     let device = Arc::new(Device::with_udp(tun, cfg).await.unwrap());
 
     HttpServer::new(move || {
+        let device = Arc::clone(&device);
         App::new()
-            .app_data(web::Data::new(device.clone()))
+            .app_data(web::Data::new(device))
             .service(
                 web::scope("/admin")
-                    .service(hello)
-                    .service(hello)
+                    .service(get_all_peers)
             ).service(
-                web::scope("/user")
-                    .service(hello)
-                    .service(hello)
-            )
+            web::scope("/user")
+                .service(hello)
+        )
     })
         .bind(("127.0.0.1", 8080))?
         .run()
