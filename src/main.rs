@@ -1,16 +1,12 @@
-use std::error::Error;
 use std::sync::Arc;
 
-use actix_web::{App, get, HttpResponse, HttpServer, Responder};
+use actix_web::{App, HttpServer, web};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use wiretun::{Cidr, Device, DeviceConfig, PeerConfig, Tun};
+use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
 
-mod tunneling;
-use tunneling::wireguard::StubTun;
-mod utils;
-use utils::utils::local_private_key;
-use crate::utils::utils::peer_public_key;
-
+use vpn::controller::admin_controller::hello;
+use vpn::utils::base64utils::{local_private_key, peer_public_key};
+use vpn::utils::tunneling_utils::StubTun;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -26,7 +22,7 @@ async fn main() -> std::io::Result<()> {
         .private_key(local_private_key())
         .peer(
             PeerConfig::default()
-                .public_kyey(peer_public_key())
+                .public_key(peer_public_key())
                 .allowed_ip("10.0.0.1".parse::<Cidr>().unwrap()),
         );
     let tun = StubTun::new();
@@ -34,15 +30,18 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .data(device.clone())
-            .service(hello)
+            .app_data(web::Data::new(device.clone()))
+            .service(
+                web::scope("/admin")
+                    .service(hello)
+                    .service(hello)
+            ).service(
+                web::scope("/user")
+                    .service(hello)
+                    .service(hello)
+            )
     })
         .bind(("127.0.0.1", 8080))?
         .run()
         .await
-}
-
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
 }
