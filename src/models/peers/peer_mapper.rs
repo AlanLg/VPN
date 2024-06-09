@@ -3,8 +3,12 @@ use wiretun::Cidr;
 use crate::models::peers::peer_config::PeerConfig;
 
 pub fn convert_to_my_peer_config(wiretun_peer_config: wiretun::PeerConfig) -> PeerConfig {
+    let public_key_str = wiretun_peer_config.public_key.iter()
+        .map(|b| format!("{:02X}", b))
+        .collect::<String>();
+
     let my_peer_config = PeerConfig {
-        public_key: wiretun_peer_config.public_key,
+        public_key: public_key_str,
         allowed_ips: fetch_ips(wiretun_peer_config.allowed_ips),
         endpoint: wiretun_peer_config.endpoint,
         preshared_key: wiretun_peer_config.preshared_key,

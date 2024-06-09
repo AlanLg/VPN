@@ -8,7 +8,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
 
 use config::ExampleConfig;
-use vpn::controller::admin_controller::{get_all_peers, hello};
+use vpn::controller::admin_controller::{delete_peer, get_all_peers};
 use vpn::controller::user_controller::get_all_users;
 use vpn::utils::base64utils::{local_private_key, peer_public_key};
 use vpn::utils::tunneling_utils::StubTun;
@@ -52,7 +52,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/admin")
                     .service(get_all_peers)
-                    //.service(delete_peer)
+                    .service(delete_peer)
             ).service(
             web::scope("/user")
                 .service(get_all_users)
