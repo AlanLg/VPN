@@ -12,3 +12,8 @@ pub struct PeerConfig {
     pub preshared_key: Option<[u8; 32]>,
     pub persistent_keepalive: Option<Duration>,
 }
+
+#[derive(Deserialize)]
+pub struct PeerDeleteRequest {
+    pub public_key: [u8; 32],
+}
