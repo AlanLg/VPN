@@ -5,11 +5,11 @@ use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use tokio_postgres::NoTls;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use vpn::controller::user_controller::{get_all_users, keys};
+use vpn::controller::user_controller::{add_ip_to_peer, get_all_users, keys};
 use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
 
 use config::ExampleConfig;
-use vpn::controller::admin_controller::{delete_peer, get_all_peers};
+use vpn::controller::admin_controller::{create_peer, delete_peer, get_all_peers};
 use vpn::utils::base64utils::{local_private_key, peer_public_key};
 use vpn::utils::tunneling_utils::StubTun;
 
@@ -52,9 +52,15 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/admin")
                     .service(get_all_peers)
+                    .service(create_peer)
                     .service(delete_peer),
             )
-            .service(web::scope("/user").service(get_all_users).service(keys))
+            .service(
+                web::scope("/user")
+                    .service(get_all_users)
+                    .service(add_ip_to_peer)
+                    .service(keys)
+            )
     })
     .bind(config.server_addr)?
     .run()

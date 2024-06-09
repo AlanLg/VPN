@@ -1,3 +1,4 @@
+use actix_web::HttpResponse;
 use base64::engine::general_purpose::STANDARD as base64Encoding;
 use base64::Engine;
 
@@ -19,5 +20,20 @@ pub fn peer_public_key() -> [u8; 32] {
     decode_base64("t2Vc/46ESybZDtMqGZNAPNq2+I9XMFeLZItTxSWvHlU=")
         .try_into()
         .unwrap()
+}
+
+pub fn parse_public_key_str(public_key_str: &str) -> Result<[u8; 32], HttpResponse> {
+    match hex::decode(public_key_str) {
+        Ok(bytes) => {
+            if bytes.len() == 32 {
+                let mut key = [0u8; 32];
+                key.copy_from_slice(&bytes);
+                Ok(key)
+            } else {
+                Err(HttpResponse::BadRequest().json("Invalid public key length"))
+            }
+        },
+        Err(_) => Err(HttpResponse::BadRequest().json("Invalid public key format")),
+    }
 }
 

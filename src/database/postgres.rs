@@ -41,3 +41,17 @@ pub async fn add_user(client: &Client, user_info: User) -> Result<User, MyError>
         .pop()
         .ok_or(MyError::NotFound) // more applicable for SELECTs
 }
+
+pub async fn get_user_by_email(client: &Client, email: String) -> Result<User, MyError> {
+    let stmt = include_str!("../../sql/get_user_by_email.sql");
+    let stmt = stmt.replace("$table_fields", &User::sql_table_fields());
+    let stmt = client.prepare(&stmt).await?;
+
+    let rows = client.query(&stmt, &[&email]).await?;
+    if let Some(row) = rows.iter().next() {
+        let user = User::from_row_ref(&row)?;
+        Ok(user)
+    } else {
+        Err(MyError::NotFound)
+    }
+}

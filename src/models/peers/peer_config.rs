@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct PeerConfig {
     pub public_key: String,
     pub allowed_ips: HashSet<String>,
@@ -16,4 +16,15 @@ pub struct PeerConfig {
 #[derive(Deserialize)]
 pub struct PeerDeleteRequest {
     pub public_key: String,
+}
+
+#[derive(Deserialize)]
+pub struct CreatePeerRequest {
+    pub email: String,
+}
+
+#[derive(Deserialize)]
+pub struct AddIpRequest {
+    pub ip: String,
+    pub email: String,
 }
