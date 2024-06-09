@@ -24,4 +24,4 @@ config = "0.13"
 dotenvy = "0.15.7"
 derive_more = "0.99.17"
 hex = "0.4.3"
-
+x25519-dalek = {version = "2.0.1", features = ["getrandom", "reusable_secrets"]}

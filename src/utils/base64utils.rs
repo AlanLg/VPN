@@ -1,5 +1,9 @@
- use base64::engine::general_purpose::STANDARD as base64Encoding;
- use base64::Engine;
+use base64::engine::general_purpose::STANDARD as base64Encoding;
+use base64::Engine;
+
+pub fn encode_base64(s: [u8; 32]) -> String {
+    base64Encoding.encode(s)
+}
 
 pub fn decode_base64(s: &str) -> Vec<u8> {
     base64Encoding.decode(s).unwrap()
@@ -16,3 +20,4 @@ pub fn peer_public_key() -> [u8; 32] {
         .try_into()
         .unwrap()
 }
+
