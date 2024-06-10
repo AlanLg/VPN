@@ -65,7 +65,7 @@ PG.DBNAME=db
 PG.POOL.MAX_SIZE=16
 ```
 <!-- Getting Started -->
-## 	:toolbox: Getting Started
+## :toolbox: Getting Started
 
 <!-- Prerequisites -->
 ### :bangbang: Prerequisites
@@ -73,7 +73,7 @@ PG.POOL.MAX_SIZE=16
 First you will need to setup the database with the schema in sql/schema.sql
 
 ```shell
-    psql -f sql/schema.sql db
+psql -f sql/schema.sql db
 ```
 <!-- Installation -->
 ### :gear: Installation
@@ -81,5 +81,5 @@ First you will need to setup the database with the schema in sql/schema.sql
 Compile and run project
 
 ```shell
-  cargo run
+cargo run
 ```
