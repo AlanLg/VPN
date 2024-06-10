@@ -6,7 +6,8 @@
   <p>
     An awesome README template for your projects! 
   </p>
-  
+</div>
+
 <!-- Table of Contents -->
 # :notebook_with_decorative_cover: Table of Contents
 
