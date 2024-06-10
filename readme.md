@@ -3,9 +3,6 @@
   <img src="wireguard.svg" alt="logo" width="200" height="auto" />
   <h1>Rust Wireguard VPN Peers Manager</h1>
   
-  <p>
-    An awesome README template for your projects! 
-  </p>
 </div>
 
 <!-- Table of Contents -->
