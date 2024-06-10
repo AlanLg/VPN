@@ -79,4 +79,3 @@ async fn create_peer(
     device_ref.control().insert_peer(peer_config);
     HttpResponse::Ok().json("Peer created successfully")
 }
-

@@ -4,6 +4,9 @@ use std::time::Duration;
 use ::config::Config;
 use actix_jwt_auth_middleware::use_jwt::UseJWTOnScope;
 use actix_jwt_auth_middleware::{Authority, TokenSigner};
+use actix_state_guards::UseStateGuardOnScope;
+use actix_web::error::InternalError;
+use actix_web::http::StatusCode;
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use ed25519_compact::KeyPair;
@@ -54,8 +57,6 @@ async fn main() -> std::io::Result<()> {
         sk: secret_key,
     } = KeyPair::generate();
 
-    println!("secret key: {:?}", secret_key);
-
     HttpServer::new(move || {
         let device = Arc::clone(&device);
         let authority = Authority::<UserClaims, Ed25519, _, _>::new()
@@ -63,7 +64,6 @@ async fn main() -> std::io::Result<()> {
             .token_signer(Some(
                 TokenSigner::new()
                     .signing_key(secret_key.clone())
-                    .access_token_name("my_access_token_name_alan")
                     .refresh_token_lifetime(Duration::from_secs(120 * 60))
                     .algorithm(Ed25519)
                     .build()
@@ -77,18 +77,28 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(device))
             .service(
-                web::scope("/admin")
-                    .service(get_all_peers)
-                    .service(create_peer)
-                    .service(delete_peer),
-            )
-            .service(
-                web::scope("/user").service(signup).service(login).use_jwt(
+                web::scope("").service(signup).service(login).use_jwt(
                     authority,
                     web::scope("")
                         .service(get_all_users)
                         .service(add_ip_to_peer)
-                        .service(keys),
+                        .service(keys)
+                        .use_state_guard(
+                            |user: UserClaims| async move {
+                                if user.role == "ADMIN" {
+                                    Ok(())
+                                } else {
+                                    Err(InternalError::new(
+                                        "You are not an Admin",
+                                        StatusCode::UNAUTHORIZED,
+                                    ))
+                                }
+                            },
+                            web::scope("/admin")
+                                .service(get_all_peers)
+                                .service(create_peer)
+                                .service(delete_peer),
+                        ),
                 ),
             )
     })

@@ -22,12 +22,12 @@ use crate::{
     utils::{base64utils::encode_base64, key_generation_utils::generate_keys},
 };
 
-#[get("/users")]
+#[get("/user/users")]
 pub async fn get_all_users(db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
     get_users(db_pool).await
 }
 
-#[get("/keys")]
+#[get("/user/keys")]
 pub async fn keys() -> Result<HttpResponse, Error> {
     let (pub_key, priv_key) = generate_keys();
     println!("{} {}", encode_base64(pub_key), encode_base64(priv_key));
@@ -74,7 +74,7 @@ async fn signup(
     Ok(HttpResponse::Ok().json("Signup Successful"))
 }
 
-#[post("/addIpToPeer")]
+#[post("/user/addIpToPeer")]
 async fn add_ip_to_peer(
     device: web::Data<Arc<Device<StubTun, UdpTransport>>>,
     db_pool: web::Data<Pool>,
