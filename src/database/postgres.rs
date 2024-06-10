@@ -25,15 +25,7 @@ pub async fn add_user(client: &Client, user_info: User) -> Result<User, MyError>
     let stmt = client.prepare(&_stmt).await.unwrap();
 
     client
-        .query(
-            &stmt,
-            &[
-                &user_info.email,
-                &user_info.first_name,
-                &user_info.last_name,
-                &user_info.username,
-            ],
-        )
+        .query(&stmt, &[&user_info.email, &user_info.username])
         .await?
         .iter()
         .map(|row| User::from_row_ref(row).unwrap())
