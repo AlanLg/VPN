@@ -2,11 +2,11 @@ DROP SCHEMA IF EXISTS testing CASCADE;
 CREATE SCHEMA testing;
 
 CREATE TABLE testing.users (
-	id  BIGSERIAL PRIMARY KEY,
-	email       VARCHAR(200) NOT NULL,
-	username    VARCHAR(50) UNIQUE NOT NULL,
-    role VARCHAR(50) NOT NULL,
+	id BIGSERIAL UNIQUE PRIMARY KEY,
+	email VARCHAR(200) UNIQUE NOT NULL,
+	username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'CLIENT',
     public_key VARCHAR(50) NULL,
-    private_key VARCHAR(50) NULL,
-	UNIQUE (username)
+    private_key VARCHAR(50) NULL
 );

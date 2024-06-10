@@ -10,7 +10,7 @@ use ed25519_compact::KeyPair;
 use jwt_compact::alg::Ed25519;
 use tokio_postgres::NoTls;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use vpn::controller::user_controller::{add_ip_to_peer, get_all_users, keys, login};
+use vpn::controller::user_controller::{add_ip_to_peer, get_all_users, keys, login, signup};
 use vpn::model::user::UserClaims;
 use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
 
@@ -83,7 +83,7 @@ async fn main() -> std::io::Result<()> {
                     .service(delete_peer),
             )
             .service(
-                web::scope("/user").service(login).use_jwt(
+                web::scope("/user").service(signup).service(login).use_jwt(
                     authority,
                     web::scope("")
                         .service(get_all_users)

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_web::{delete, get, HttpResponse, post, Responder, web};
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use deadpool_postgres::Pool;
 use wiretun::{Device, PeerConfig, UdpTransport};
 
@@ -27,7 +27,10 @@ async fn get_all_peers(device: web::Data<Arc<Device<StubTun, UdpTransport>>>) ->
 }
 
 #[delete("/deletePeer")]
-async fn delete_peer(device: web::Data<Arc<Device<StubTun, UdpTransport>>>, req: web::Json<PeerDeleteRequest>) -> impl Responder {
+async fn delete_peer(
+    device: web::Data<Arc<Device<StubTun, UdpTransport>>>,
+    req: web::Json<PeerDeleteRequest>,
+) -> impl Responder {
     let device_ref = device.get_ref();
     let public_key_str = req.into_inner().public_key;
     let public_key = match parse_public_key_str(&public_key_str) {
@@ -49,7 +52,7 @@ async fn delete_peer(device: web::Data<Arc<Device<StubTun, UdpTransport>>>, req:
 async fn create_peer(
     device: web::Data<Arc<Device<StubTun, UdpTransport>>>,
     db_pool: web::Data<Pool>,
-    req: web::Json<CreatePeerRequest>
+    req: web::Json<CreatePeerRequest>,
 ) -> impl Responder {
     let email = req.email.clone();
 
@@ -59,7 +62,7 @@ async fn create_peer(
     };
 
     let public_key_str = user.public_key;
-    let public_key = match parse_public_key_str(&public_key_str) {
+    let public_key = match parse_public_key_str(&public_key_str.unwrap()) {
         Ok(key) => key,
         Err(error_response) => return error_response,
     };
@@ -76,3 +79,4 @@ async fn create_peer(
     device_ref.control().insert_peer(peer_config);
     HttpResponse::Ok().json("Peer created successfully")
 }
+
