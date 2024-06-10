@@ -15,7 +15,7 @@ use crate::database::postgres;
 use crate::database::postgres::check_email_and_password_valid;
 use crate::errors::pg_errors::MyError;
 use crate::model::ip::{AddIpBdd, AddIpRequest};
-use crate::model::user::UserClaims;
+use crate::model::user::{AddUserBdd, UserClaims};
 use crate::model::user::UserLoginRequest;
 use crate::model::user::UserSignUpRequest;
 use crate::service::user_service::get_user_by_email;
@@ -69,7 +69,29 @@ async fn signup(
 
     let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
 
-    postgres::add_user(&client, user_info).await;
+    let (public_key, private_key) = generate_keys();
+
+    let user_bdd = AddUserBdd {
+        email: user_info.email,
+        username: user_info.username,
+        password: user_info.password,
+        public_key: hex::encode(public_key),
+        private_key: hex::encode(private_key),
+    };
+
+    postgres::add_user(&client, user_bdd.clone()).await;
+
+    let user = match get_user_by_email(db_pool.clone(), user_bdd.email.clone()).await {
+        Ok(user) => user,
+        Err(_) => return Ok(HttpResponse::NotFound().json("User not found")),
+    };
+
+    let ip_bdd = AddIpBdd {
+        ip: user_info.ip,
+        user_id: user.id,
+    };
+
+    postgres::add_ip(&client, ip_bdd).await;
 
     Ok(HttpResponse::Ok().json("Signup Successful"))
 }

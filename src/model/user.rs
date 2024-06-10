@@ -31,11 +31,22 @@ pub struct UserSignUpRequest {
     pub email: String,
     pub username: String,
     pub password: String,
+    pub ip: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct UserSignUpResponse {
-    pub id: i64,
     pub email: String,
     pub username: String,
+    pub public_key: String,
+    pub private_key: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct AddUserBdd {
+    pub email: String,
+    pub username: String,
+    pub password: String,
+    pub public_key: String,
+    pub private_key: String,
 }

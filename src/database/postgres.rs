@@ -2,8 +2,8 @@ use deadpool_postgres::{Client, GenericClient};
 use tokio_pg_mapper::FromTokioPostgresRow;
 
 use crate::errors::pg_errors::MyError;
-use crate::model::ip::{AddIpBdd, AddIpRequest, Ip};
-use crate::model::user::{User, UserLoginRequest, UserSignUpRequest};
+use crate::model::ip::{AddIpBdd, Ip};
+use crate::model::user::{AddUserBdd, User, UserLoginRequest};
 
 pub async fn get_users(client: &Client) -> Result<Vec<User>, MyError> {
     let stmt = include_str!("../../sql/get_users.sql");
@@ -34,7 +34,7 @@ pub async fn check_email_and_password_valid(
         .map_or(None, |row| Some(User::from_row_ref(&row).unwrap()))
 }
 
-pub async fn add_user(client: &Client, user_info: UserSignUpRequest) {
+pub async fn add_user(client: &Client, user_info: AddUserBdd) {
     let stmt = include_str!("../../sql/add_user.sql");
     let stmt = stmt.replace("$table_fields", &User::sql_table_fields());
     println!("statement: {}", stmt);
@@ -43,7 +43,7 @@ pub async fn add_user(client: &Client, user_info: UserSignUpRequest) {
     client
         .query(
             &stmt,
-            &[&user_info.email, &user_info.username, &user_info.password],
+            &[&user_info.email, &user_info.username, &user_info.password, &user_info.public_key, &user_info.private_key],
         )
         .await
         .unwrap();
