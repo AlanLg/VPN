@@ -7,6 +7,13 @@ CREATE TABLE testing.users (
 	username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(100) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'CLIENT',
-    public_key VARCHAR(50) NULL,
-    private_key VARCHAR(50) NULL
+    public_key VARCHAR(100) NULL,
+    private_key VARCHAR(100) NULL
+);
+
+CREATE TABLE testing.ips (
+    id BIGSERIAL UNIQUE PRIMARY KEY,
+    ip VARCHAR(50) UNIQUE NOT NULL,
+    user_id BIGINT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES testing.users(id)
 );

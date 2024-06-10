@@ -1,0 +1,1 @@
+SELECT DISTINCT $table_fields FROM testing.ips WHERE user_id = $1;

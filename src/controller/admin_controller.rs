@@ -1,11 +1,15 @@
+use std::collections::HashSet;
+use std::str::FromStr;
 use std::sync::Arc;
 
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, HttpResponse, post, Responder, web};
 use deadpool_postgres::Pool;
-use wiretun::{Device, PeerConfig, UdpTransport};
+use wiretun::{Cidr, Device, PeerConfig, UdpTransport};
+use crate::errors::pg_errors::MyError;
 
 use crate::models::peers::peer_config::{CreatePeerRequest, PeerDeleteRequest};
 use crate::models::peers::peer_mapper::convert_all_peers_to_my_peer_config;
+use crate::service::ip_service::get_ips_from_user_id;
 use crate::service::user_service::get_user_by_email;
 use crate::utils::base64utils::parse_public_key_str;
 use crate::utils::tunneling_utils::StubTun;
@@ -53,23 +57,36 @@ async fn create_peer(
     device: web::Data<Arc<Device<StubTun, UdpTransport>>>,
     db_pool: web::Data<Pool>,
     req: web::Json<CreatePeerRequest>,
-) -> impl Responder {
+) -> Result<HttpResponse, MyError> {
     let email = req.email.clone();
 
     let user = match get_user_by_email(db_pool.clone(), email).await {
         Ok(user) => user,
-        Err(_) => return HttpResponse::NotFound().json("User not found"),
+        Err(_) => return Ok(HttpResponse::NotFound().json("User not found")),
     };
 
-    let public_key_str = user.public_key;
-    let public_key = match parse_public_key_str(&public_key_str.unwrap()) {
+    let ips = match get_ips_from_user_id(db_pool.clone(), user.id).await {
+        Ok(ips) => ips,
+        Err(_) => return Ok(HttpResponse::NotFound().json("IPs not found")),
+    };
+
+    let hash_set_ips: HashSet<Cidr> = ips.iter()
+        .map(|ip| Cidr::from_str(&ip.ip).unwrap())
+        .collect();
+
+    let public_key_str = match user.public_key {
+        Some(pk) => pk,
+        None => return Ok(HttpResponse::NotFound().json("User does not have a public key")),
+    };
+
+    let public_key = match parse_public_key_str(&public_key_str) {
         Ok(key) => key,
-        Err(error_response) => return error_response,
+        Err(error_response) => return Ok(error_response),
     };
 
     let peer_config = PeerConfig {
         public_key,
-        allowed_ips: Default::default(), // Récupérer l'ip par défaut de la base
+        allowed_ips: hash_set_ips,
         endpoint: None,
         preshared_key: None,
         persistent_keepalive: None,
@@ -77,5 +94,6 @@ async fn create_peer(
 
     let device_ref = device.get_ref();
     device_ref.control().insert_peer(peer_config);
-    HttpResponse::Ok().json("Peer created successfully")
+    Ok(HttpResponse::Ok().json("Peer created successfully"))
 }
+

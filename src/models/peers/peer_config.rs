@@ -22,9 +22,3 @@ pub struct PeerDeleteRequest {
 pub struct CreatePeerRequest {
     pub email: String,
 }
-
-#[derive(Deserialize)]
-pub struct AddIpRequest {
-    pub ip: String,
-    pub email: String,
-}
