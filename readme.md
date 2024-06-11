@@ -80,3 +80,6 @@ Compile and run project
 ```shell
 cargo run
 ```
+
+The Postman Collection : [Download Rust VPN Postman Collection](Rust%20VPN.postman_collection.json)
+
