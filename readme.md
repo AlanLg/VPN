@@ -76,8 +76,9 @@ psql -f sql/schema.sql db
 ### :gear: Installation
 
 Compile and run project
-Collection postman is on project
 
 ```shell
 cargo run
 ```
+
+The Postman Collection : [Download File](path/to/your/file)
