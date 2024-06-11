@@ -18,7 +18,7 @@ use vpn::model::user::UserClaims;
 use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
 
 use config::ExampleConfig;
-use vpn::controller::admin_controller::{create_peer, delete_peer, get_all_peers, get_all_users};
+use vpn::controller::admin_controller::{create_peer, delete_peer, get_all_peers, get_all_users, update_private_key};
 use vpn::utils::base64utils::{local_private_key, peer_public_key};
 use vpn::utils::tunneling_utils::StubTun;
 
@@ -97,7 +97,8 @@ async fn main() -> std::io::Result<()> {
                                 .service(get_all_users)
                                 .service(get_all_peers)
                                 .service(create_peer)
-                                .service(delete_peer),
+                                .service(delete_peer)
+                                .service(update_private_key),
                         ),
                 ),
             )

@@ -1,6 +1,7 @@
 use actix_web::HttpResponse;
 use base64::engine::general_purpose::STANDARD as base64Encoding;
 use base64::Engine;
+use serde::Deserialize;
 
 pub fn encode_base64(s: [u8; 32]) -> String {
     base64Encoding.encode(s)
@@ -22,18 +23,23 @@ pub fn peer_public_key() -> [u8; 32] {
         .unwrap()
 }
 
-pub fn parse_public_key_str(public_key_str: &str) -> Result<[u8; 32], HttpResponse> {
-    match hex::decode(public_key_str) {
+pub fn parse_key_str(key_str: &str) -> Result<[u8; 32], HttpResponse> {
+    match hex::decode(key_str) {
         Ok(bytes) => {
             if bytes.len() == 32 {
                 let mut key = [0u8; 32];
                 key.copy_from_slice(&bytes);
                 Ok(key)
             } else {
-                Err(HttpResponse::BadRequest().json("Invalid public key length"))
+                Err(HttpResponse::BadRequest().json("Invalid key length"))
             }
         },
-        Err(_) => Err(HttpResponse::BadRequest().json("Invalid public key format")),
+        Err(_) => Err(HttpResponse::BadRequest().json("Invalid key format")),
     }
+}
+
+#[derive(Deserialize)]
+pub struct PrivateKeyRequest {
+    pub private_key: String,
 }
 

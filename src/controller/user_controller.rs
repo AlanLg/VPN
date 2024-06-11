@@ -16,7 +16,7 @@ use crate::model::user::UserLoginRequest;
 use crate::model::user::UserSignUpRequest;
 use crate::service::user_service::get_user_by_email;
 use crate::utils::{base64utils::encode_base64, key_generation_utils::generate_keys};
-use crate::utils::base64utils::parse_public_key_str;
+use crate::utils::base64utils::parse_key_str;
 use crate::utils::tunneling_utils::StubTun;
 
 #[get("/user/keys")]
@@ -107,7 +107,7 @@ async fn add_ip_to_peer(
         None => return Ok(HttpResponse::NotFound().json("User does not have a public key")),
     };
 
-    let public_key = match parse_public_key_str(&public_key_str) {
+    let public_key = match parse_key_str(&public_key_str) {
         Ok(key) => key,
         Err(error_response) => return Ok(error_response),
     };
