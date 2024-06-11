@@ -81,4 +81,4 @@ Compile and run project
 cargo run
 ```
 
-The Postman Collection : [Download File](path/to/your/file)
+The Postman Collection : [Download File](Rust VPN.postman_collection.json)
