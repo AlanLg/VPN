@@ -101,6 +101,34 @@
 			"name": "admin",
 			"item": [
 				{
+					"name": "updatePrivateKey",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"private_key\": \"abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/admin/updatePrivateKey",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"admin",
+								"updatePrivateKey"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "login with admin",
 					"request": {
 						"method": "POST",
