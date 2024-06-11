@@ -13,12 +13,12 @@ use ed25519_compact::KeyPair;
 use jwt_compact::alg::Ed25519;
 use tokio_postgres::NoTls;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use vpn::controller::user_controller::{add_ip_to_peer, get_all_users, keys, login, signup};
+use vpn::controller::user_controller::{add_ip_to_peer, keys, login, signup};
 use vpn::model::user::UserClaims;
 use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
 
 use config::ExampleConfig;
-use vpn::controller::admin_controller::{create_peer, delete_peer, get_all_peers};
+use vpn::controller::admin_controller::{create_peer, delete_peer, get_all_peers, get_all_users};
 use vpn::utils::base64utils::{local_private_key, peer_public_key};
 use vpn::utils::tunneling_utils::StubTun;
 
@@ -80,7 +80,6 @@ async fn main() -> std::io::Result<()> {
                 web::scope("").service(signup).service(login).use_jwt(
                     authority,
                     web::scope("")
-                        .service(get_all_users)
                         .service(add_ip_to_peer)
                         .service(keys)
                         .use_state_guard(
@@ -95,6 +94,7 @@ async fn main() -> std::io::Result<()> {
                                 }
                             },
                             web::scope("/admin")
+                                .service(get_all_users)
                                 .service(get_all_peers)
                                 .service(create_peer)
                                 .service(delete_peer),

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use actix_web::{delete, get, HttpResponse, post, Responder, web};
+use actix_web::{delete, Error, get, HttpResponse, post, Responder, web};
 use deadpool_postgres::Pool;
 use wiretun::{Cidr, Device, PeerConfig, UdpTransport};
 use crate::errors::pg_errors::MyError;
@@ -10,11 +10,11 @@ use crate::errors::pg_errors::MyError;
 use crate::models::peers::peer_config::{CreatePeerRequest, PeerDeleteRequest};
 use crate::models::peers::peer_mapper::convert_all_peers_to_my_peer_config;
 use crate::service::ip_service::get_ips_from_user_id;
-use crate::service::user_service::get_user_by_email;
+use crate::service::user_service::{get_user_by_email, get_users};
 use crate::utils::base64utils::parse_public_key_str;
 use crate::utils::tunneling_utils::StubTun;
 
-#[get("/allPeers")]
+#[get("/peers")]
 async fn get_all_peers(device: web::Data<Arc<Device<StubTun, UdpTransport>>>) -> HttpResponse {
     let device_ref = device.get_ref();
     let wiretun_peers = device_ref.control().config().peers;
@@ -28,6 +28,11 @@ async fn get_all_peers(device: web::Data<Arc<Device<StubTun, UdpTransport>>>) ->
         .unwrap_or_else(|_| "[]".to_string());
 
     HttpResponse::Ok().body(my_peers_json)
+}
+
+#[get("/users")]
+pub async fn get_all_users(db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
+    get_users(db_pool).await
 }
 
 #[delete("/deletePeer")]

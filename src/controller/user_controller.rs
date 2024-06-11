@@ -7,10 +7,6 @@ use deadpool_postgres::Pool;
 use jwt_compact::alg::Ed25519;
 use wiretun::{Cidr, Device, UdpTransport};
 
-use crate::{
-    service::user_service::get_users,
-    utils::{base64utils::encode_base64, key_generation_utils::generate_keys},
-};
 use crate::database::postgres;
 use crate::database::postgres::check_email_and_password_valid;
 use crate::errors::pg_errors::MyError;
@@ -19,13 +15,9 @@ use crate::model::user::{AddUserBdd, UserClaims};
 use crate::model::user::UserLoginRequest;
 use crate::model::user::UserSignUpRequest;
 use crate::service::user_service::get_user_by_email;
+use crate::utils::{base64utils::encode_base64, key_generation_utils::generate_keys};
 use crate::utils::base64utils::parse_public_key_str;
 use crate::utils::tunneling_utils::StubTun;
-
-#[get("/user/users")]
-pub async fn get_all_users(db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
-    get_users(db_pool).await
-}
 
 #[get("/user/keys")]
 pub async fn keys() -> Result<HttpResponse, Error> {
