@@ -54,6 +54,7 @@ pub struct AddUserBdd {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct UserInformationResponse {
     pub email: String,
-    pub public_key: String,
-    pub private_key: String,
+    pub user_public_key: String,
+    pub user_private_key: String,
+    pub device_public_key: String,
 }

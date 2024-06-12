@@ -6,6 +6,7 @@ use deadpool_postgres::Client;
 use deadpool_postgres::Pool;
 use jwt_compact::alg::Ed25519;
 use wiretun::{Cidr, Device, UdpTransport};
+use wiretun::noise::crypto::PublicKey;
 
 use crate::database::postgres;
 use crate::database::postgres::check_email_and_password_valid;
@@ -28,6 +29,7 @@ pub async fn keys() -> Result<HttpResponse, Error> {
 
 #[get("/user/informations")]
 pub async fn get_necessary_informations(
+    device: web::Data<Arc<Device<StubTun, UdpTransport>>>,
     user_claims: UserClaims,
     db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
     let user = match get_user_by_id(db_pool.clone(), user_claims.id).await {
@@ -35,10 +37,14 @@ pub async fn get_necessary_informations(
         Err(_) => return Ok(HttpResponse::NotFound().json("User not found")),
     };
 
+    let device_ref = device.get_ref();
+    let device_public_key_str = PublicKey::from(device_ref.control().config().private_key);
+
     let user_response: UserInformationResponse = UserInformationResponse {
         email: user.email,
-        public_key: user.public_key,
-        private_key: user.private_key,
+        user_public_key: user.public_key,
+        user_private_key: user.private_key,
+        device_public_key: hex::encode(device_public_key_str.as_bytes()),
     };
 
     Ok(HttpResponse::Ok().json(user_response))

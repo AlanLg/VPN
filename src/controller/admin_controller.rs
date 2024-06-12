@@ -5,8 +5,8 @@ use std::sync::Arc;
 use actix_web::{delete, Error, get, HttpResponse, post, Responder, web};
 use deadpool_postgres::Pool;
 use wiretun::{Cidr, Device, PeerConfig, UdpTransport};
-use crate::errors::pg_errors::MyError;
 
+use crate::errors::pg_errors::MyError;
 use crate::models::peers::peer_config::{CreatePeerRequest, PeerDeleteRequest};
 use crate::models::peers::peer_mapper::convert_all_peers_to_my_peer_config;
 use crate::service::ip_service::get_ips_from_user_id;
