@@ -17,7 +17,7 @@ pub fn decode_base64(key_str: &str) -> Result<[u8; 32], HttpResponse> {
             } else {
                 Err(HttpResponse::BadRequest().json("Invalid key length"))
             }
-        },
+        }
         Err(_) => Err(HttpResponse::BadRequest().json("Invalid key format")),
     }
 }
@@ -27,7 +27,7 @@ pub fn local_private_key() -> Result<[u8; 32], HttpResponse> {
 }
 
 pub fn peer_public_key() -> Result<[u8; 32], HttpResponse> {
-    decode_base64("t2Vc/46ESybZDtMqGZNAPNq2+I9XMFeLZItTxSWvHlU=")
+    decode_base64("mIZFnuC/cLMSqB9YiN8JomnMqedvWpD7XRZDJJtQfn4=")
 }
 
 #[derive(Deserialize)]
