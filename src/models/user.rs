@@ -58,3 +58,9 @@ pub struct UserInformationResponse {
     pub user_private_key: String,
     pub device_public_key: String,
 }
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct UserUpdatePasswordRequest {
+    pub old_password: String,
+    pub new_password: String,
+}

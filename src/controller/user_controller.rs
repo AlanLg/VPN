@@ -11,10 +11,12 @@ use x25519_dalek::StaticSecret;
 
 use crate::database::postgres;
 use crate::database::postgres::check_email_and_password_valid;
+use crate::database::postgres::update_user_password;
 use crate::errors::pg_errors::MyError;
 use crate::models::ip::{AddIpBdd, AddIpRequest};
 use crate::models::user::UserLoginRequest;
 use crate::models::user::UserSignUpRequest;
+use crate::models::user::UserUpdatePasswordRequest;
 use crate::models::user::{AddUserBdd, UserClaims, UserInformationResponse};
 use crate::service::ip_service::check_ip_existence;
 use crate::service::user_service::{get_user_by_email, get_user_by_id};
@@ -53,6 +55,17 @@ pub async fn get_necessary_informations(
     };
 
     Ok(HttpResponse::Ok().json(user_response))
+}
+
+#[post("/user/updatePassword")]
+pub async fn update_password(
+    req: web::Json<UserUpdatePasswordRequest>,
+    user_claims: UserClaims,
+    db_pool: web::Data<Pool>,
+) -> Result<HttpResponse, Error> {
+    let client: Client = db_pool.get().await.map_err(MyError::PoolError).unwrap();
+    update_user_password(&client, req.into_inner(), user_claims).await;
+    Ok(HttpResponse::Ok().into())
 }
 
 #[post("/login")]

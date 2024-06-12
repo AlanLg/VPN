@@ -3,7 +3,9 @@ use tokio_pg_mapper::FromTokioPostgresRow;
 
 use crate::errors::pg_errors::MyError;
 use crate::models::ip::{AddIpBdd, Ip};
-use crate::models::user::{AddUserBdd, User, UserLoginRequest};
+use crate::models::user::{
+    AddUserBdd, User, UserClaims, UserLoginRequest, UserUpdatePasswordRequest,
+};
 
 pub async fn get_users(client: &Client) -> Result<Vec<User>, MyError> {
     let stmt = include_str!("../../sql/get_users.sql");
@@ -34,6 +36,20 @@ pub async fn check_email_and_password_valid(
         .map_or(None, |row| Some(User::from_row_ref(&row).unwrap()))
 }
 
+pub async fn update_user_password(
+    client: &Client,
+    user_passwords: UserUpdatePasswordRequest,
+    user_info: UserClaims,
+) {
+    let stmt = include_str!("../../sql/change_password.sql");
+    println!("statement: {}", stmt);
+    let stmt = client.prepare(&stmt).await.unwrap();
+
+    let _ = client
+        .query_one(&stmt, &[&user_passwords.new_password, &user_info.id])
+        .await;
+}
+
 pub async fn add_user(client: &Client, user_info: AddUserBdd) {
     let stmt = include_str!("../../sql/add_user.sql");
     let stmt = stmt.replace("$table_fields", &User::sql_table_fields());
@@ -43,7 +59,13 @@ pub async fn add_user(client: &Client, user_info: AddUserBdd) {
     client
         .query(
             &stmt,
-            &[&user_info.email, &user_info.username, &user_info.password, &user_info.public_key, &user_info.private_key],
+            &[
+                &user_info.email,
+                &user_info.username,
+                &user_info.password,
+                &user_info.public_key,
+                &user_info.private_key,
+            ],
         )
         .await
         .unwrap();
@@ -69,10 +91,7 @@ pub async fn get_ips_from_user_id(client: &Client, user_id: i64) -> Result<Vec<I
     let stmt = client.prepare(&stmt).await?;
 
     let ips = client
-        .query(
-            &stmt,
-            &[&user_id],
-        )
+        .query(&stmt, &[&user_id])
         .await?
         .iter()
         .map(|row| Ip::from_row_ref(row).unwrap())
@@ -85,17 +104,13 @@ pub async fn get_ips_from_user_id(client: &Client, user_id: i64) -> Result<Vec<I
     }
 }
 
-
 pub async fn add_ip(client: &Client, ip_info: AddIpBdd) {
     let stmt = include_str!("../../sql/add_ip.sql");
     let stmt = stmt.replace("$table_fields", &Ip::sql_table_fields());
     println!("statement: {}", stmt);
     let stmt = client.prepare(&stmt).await.unwrap();
     client
-        .query(
-            &stmt,
-            &[&ip_info.ip, &ip_info.user_id],
-        )
+        .query(&stmt, &[&ip_info.ip, &ip_info.user_id])
         .await
         .unwrap();
 }

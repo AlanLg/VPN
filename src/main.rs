@@ -20,7 +20,7 @@ use vpn::controller::admin_controller::{
     create_peer, delete_peer, get_all_peers, get_all_users, update_private_key,
 };
 use vpn::controller::user_controller::{
-    add_ip_to_peer, get_necessary_informations, keys, login, signup,
+    add_ip_to_peer, get_necessary_informations, keys, login, signup, update_password,
 };
 use vpn::models::user::UserClaims;
 use vpn::utils::base64utils::{local_private_key, peer_public_key};
@@ -86,6 +86,7 @@ async fn main() -> std::io::Result<()> {
                     web::scope("")
                         .service(add_ip_to_peer)
                         .service(get_necessary_informations)
+                        .service(update_password)
                         .service(keys)
                         .use_state_guard(
                             |user: UserClaims| async move {
@@ -122,4 +123,3 @@ mod config {
         pub pg: deadpool_postgres::Config,
     }
 }
-
