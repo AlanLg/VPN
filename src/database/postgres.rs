@@ -113,3 +113,21 @@ pub async fn get_user_by_id(client: &Client, id: i64) -> Result<User, MyError> {
         Err(MyError::NotFound)
     }
 }
+
+pub async fn check_ip_existence(client: &Client, ip: &str) -> Result<bool, MyError> {
+    let stmt = include_str!("../../sql/get_ip_by_ip.sql");
+    let exists: bool = client.query_one(stmt, &[&ip]).await?.get(0);
+    Ok(exists)
+}
+
+pub async fn get_ip_by_ip(client: &Client, ip: &str) -> Result<Option<Ip>, MyError> {
+    let stmt = include_str!("../../sql/get_ip_by_ip.sql");
+    let rows = client.query(stmt, &[&ip]).await?;
+
+    if let Some(row) = rows.get(0) {
+        let ip = Ip::from_row_ref(row)?;
+        Ok(Some(ip))
+    } else {
+        Ok(None)
+    }
+}

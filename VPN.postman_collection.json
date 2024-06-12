@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "f9d1db1f-9140-4208-b993-651f2a174dd8",
-		"name": "Rust VPN",
+		"name": "VPN",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "25521999"
 	},
@@ -122,7 +122,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"private_key\": \"abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890\"\n}",
+							"raw": "{\n    \"private_key\": \"e6FzPPyyKZUOeZU4jPO4aSd34V4DLEGh5r/DvKufmag=\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -150,7 +150,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"alan2@gmail.com\",\n    \"password\": \"supersecretpassword\"\n}",
+							"raw": "{\n    \"email\": \"admin@gmail.com\",\n    \"password\": \"admin\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

@@ -16,6 +16,7 @@ use crate::models::ip::{AddIpBdd, AddIpRequest};
 use crate::models::user::UserLoginRequest;
 use crate::models::user::UserSignUpRequest;
 use crate::models::user::{AddUserBdd, UserClaims, UserInformationResponse};
+use crate::service::ip_service::check_ip_existence;
 use crate::service::user_service::{get_user_by_email, get_user_by_id};
 use crate::utils::base64utils::decode_base64;
 use crate::utils::tunneling_utils::StubTun;
@@ -90,6 +91,10 @@ async fn signup(
     let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
 
     let (public_key, private_key) = generate_keys();
+
+    if let Some(_) = check_ip_existence(&client, &user_info.ip).await? {
+        return Ok(HttpResponse::BadRequest().json("IP already exists"));
+    }
 
     let user_bdd = AddUserBdd {
         email: user_info.email,
