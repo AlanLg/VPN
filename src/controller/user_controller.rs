@@ -17,7 +17,7 @@ use crate::models::user::UserLoginRequest;
 use crate::models::user::UserSignUpRequest;
 use crate::service::user_service::{get_user_by_email, get_user_by_id};
 use crate::utils::{base64utils::encode_base64, key_generation_utils::generate_keys};
-use crate::utils::base64utils::parse_key_str;
+use crate::utils::base64utils::decode_base64;
 use crate::utils::tunneling_utils::StubTun;
 
 #[get("/user/keys")]
@@ -44,7 +44,7 @@ pub async fn get_necessary_informations(
         email: user.email,
         user_public_key: user.public_key,
         user_private_key: user.private_key,
-        device_public_key: hex::encode(device_public_key_str.as_bytes()),
+        device_public_key: encode_base64(device_public_key_str.as_bytes().clone()),
     };
 
     Ok(HttpResponse::Ok().json(user_response))
@@ -91,8 +91,8 @@ async fn signup(
         email: user_info.email,
         username: user_info.username,
         password: user_info.password,
-        public_key: hex::encode(public_key),
-        private_key: hex::encode(private_key),
+        public_key: encode_base64(public_key),
+        private_key: encode_base64(private_key),
     };
 
     postgres::add_user(&client, user_bdd.clone()).await;
@@ -128,7 +128,7 @@ async fn add_ip_to_peer(
 
     let public_key_str = user.public_key;
 
-    let public_key = match parse_key_str(&public_key_str) {
+    let public_key = match decode_base64(&public_key_str) {
         Ok(key) => key,
         Err(error_response) => return Ok(error_response),
     };

@@ -2,23 +2,23 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use ::config::Config;
-use actix_jwt_auth_middleware::use_jwt::UseJWTOnScope;
 use actix_jwt_auth_middleware::{Authority, TokenSigner};
+use actix_jwt_auth_middleware::use_jwt::UseJWTOnScope;
 use actix_state_guards::UseStateGuardOnScope;
+use actix_web::{App, HttpServer, web};
 use actix_web::error::InternalError;
 use actix_web::http::StatusCode;
-use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use ed25519_compact::KeyPair;
 use jwt_compact::alg::Ed25519;
 use tokio_postgres::NoTls;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use vpn::controller::user_controller::{add_ip_to_peer, get_necessary_informations, keys, login, signup};
-use vpn::models::user::UserClaims;
 use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
 
 use config::ExampleConfig;
 use vpn::controller::admin_controller::{create_peer, delete_peer, get_all_peers, get_all_users, update_private_key};
+use vpn::controller::user_controller::{add_ip_to_peer, get_necessary_informations, keys, login, signup};
+use vpn::models::user::UserClaims;
 use vpn::utils::base64utils::{local_private_key, peer_public_key};
 use vpn::utils::tunneling_utils::StubTun;
 
@@ -44,10 +44,10 @@ async fn main() -> std::io::Result<()> {
 
     let cfg = DeviceConfig::default()
         .listen_port(51820)
-        .private_key(local_private_key())
+        .private_key(local_private_key().unwrap())
         .peer(
             PeerConfig::default()
-                .public_key(peer_public_key())
+                .public_key(peer_public_key().unwrap())
                 .allowed_ip("10.0.0.1".parse::<Cidr>().unwrap()),
         );
     let tun = StubTun::new();
@@ -104,9 +104,9 @@ async fn main() -> std::io::Result<()> {
                 ),
             )
     })
-    .bind(config.server_addr)?
-    .run()
-    .await
+        .bind(config.server_addr)?
+        .run()
+        .await
 }
 
 mod config {

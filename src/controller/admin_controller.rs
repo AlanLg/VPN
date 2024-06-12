@@ -11,7 +11,7 @@ use crate::models::peers::peer_config::{CreatePeerRequest, PeerDeleteRequest};
 use crate::models::peers::peer_mapper::convert_all_peers_to_my_peer_config;
 use crate::service::ip_service::get_ips_from_user_id;
 use crate::service::user_service::{get_user_by_email, get_users};
-use crate::utils::base64utils::{parse_key_str, PrivateKeyRequest};
+use crate::utils::base64utils::{decode_base64, PrivateKeyRequest};
 use crate::utils::tunneling_utils::StubTun;
 
 #[get("/peers")]
@@ -42,7 +42,7 @@ async fn delete_peer(
 ) -> impl Responder {
     let device_ref = device.get_ref();
     let public_key_str = req.into_inner().public_key;
-    let public_key = match parse_key_str(&public_key_str) {
+    let public_key = match decode_base64(&public_key_str) {
         Ok(key) => key,
         Err(_) => return HttpResponse::BadRequest().body("Invalid public key format"),
     };
@@ -81,7 +81,7 @@ async fn create_peer(
 
     let public_key_str = user.public_key;
 
-    let public_key = match parse_key_str(&public_key_str) {
+    let public_key = match decode_base64(&public_key_str) {
         Ok(key) => key,
         Err(error_response) => return Ok(error_response),
     };
@@ -103,7 +103,7 @@ async fn create_peer(
 async fn update_private_key(device: web::Data<Arc<Device<StubTun, UdpTransport>>>, req: web::Json<PrivateKeyRequest>) -> Result<HttpResponse, MyError> {
     let device_ref = device.get_ref();
 
-    let private_key = match parse_key_str(&req.private_key) {
+    let private_key = match decode_base64(&req.private_key) {
         Ok(key) => key,
         Err(error_response) => return Ok(error_response),
     };
