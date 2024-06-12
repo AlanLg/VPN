@@ -10,8 +10,8 @@ pub struct User {
     pub username: String,
     pub password: String,
     pub role: String,
-    pub public_key: Option<String>,
-    pub private_key: Option<String>,
+    pub public_key: String,
+    pub private_key: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, FromRequest)]
@@ -47,6 +47,13 @@ pub struct AddUserBdd {
     pub email: String,
     pub username: String,
     pub password: String,
+    pub public_key: String,
+    pub private_key: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct UserInformationResponse {
+    pub email: String,
     pub public_key: String,
     pub private_key: String,
 }

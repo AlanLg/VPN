@@ -79,10 +79,7 @@ async fn create_peer(
         .map(|ip| Cidr::from_str(&ip.ip).unwrap())
         .collect();
 
-    let public_key_str = match user.public_key {
-        Some(pk) => pk,
-        None => return Ok(HttpResponse::NotFound().json("User does not have a public key")),
-    };
+    let public_key_str = user.public_key;
 
     let public_key = match parse_key_str(&public_key_str) {
         Ok(key) => key,

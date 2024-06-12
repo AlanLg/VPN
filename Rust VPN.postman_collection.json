@@ -38,11 +38,8 @@
 				},
 				{
 					"name": "login with client",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -54,14 +51,13 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/user/users",
+							"raw": "localhost:8080/login",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"user",
-								"users"
+								"login"
 							]
 						}
 					},
@@ -94,12 +90,59 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "getNecessaryInformations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/user/informations",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"informations"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "admin",
 			"item": [
+				{
+					"name": "updatePrivateKey",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"private_key\": \"abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/admin/updatePrivateKey",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"admin",
+								"updatePrivateKey"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "login with admin",
 					"request": {

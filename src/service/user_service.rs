@@ -3,7 +3,7 @@ use crate::errors::pg_errors::MyError;
 use actix_web::{web, Error, HttpResponse};
 use deadpool_postgres::{Client, Pool};
 
-use crate::model::user::User;
+use crate::models::user::User;
 
 pub async fn get_users(db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
     let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
@@ -16,5 +16,11 @@ pub async fn get_users(db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> 
 pub async fn get_user_by_email(db_pool: web::Data<Pool>, email: String) -> Result<User, MyError> {
     let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
     let user = postgres::get_user_by_email(&client, email).await?;
+    Ok(user)
+}
+
+pub async fn get_user_by_id(db_pool: web::Data<Pool>, id: i64) -> Result<User, MyError> {
+    let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
+    let user = postgres::get_user_by_id(&client, id).await?;
     Ok(user)
 }

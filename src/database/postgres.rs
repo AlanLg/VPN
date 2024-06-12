@@ -2,8 +2,8 @@ use deadpool_postgres::{Client, GenericClient};
 use tokio_pg_mapper::FromTokioPostgresRow;
 
 use crate::errors::pg_errors::MyError;
-use crate::model::ip::{AddIpBdd, Ip};
-use crate::model::user::{AddUserBdd, User, UserLoginRequest};
+use crate::models::ip::{AddIpBdd, Ip};
+use crate::models::user::{AddUserBdd, User, UserLoginRequest};
 
 pub async fn get_users(client: &Client) -> Result<Vec<User>, MyError> {
     let stmt = include_str!("../../sql/get_users.sql");
@@ -98,4 +98,18 @@ pub async fn add_ip(client: &Client, ip_info: AddIpBdd) {
         )
         .await
         .unwrap();
+}
+
+pub async fn get_user_by_id(client: &Client, id: i64) -> Result<User, MyError> {
+    let stmt = include_str!("../../sql/get_user_by_id.sql");
+    let stmt = stmt.replace("$table_fields", &User::sql_table_fields());
+    let stmt = client.prepare(&stmt).await?;
+
+    let rows = client.query(&stmt, &[&id]).await?;
+    if let Some(row) = rows.iter().next() {
+        let user = User::from_row_ref(&row)?;
+        Ok(user)
+    } else {
+        Err(MyError::NotFound)
+    }
 }

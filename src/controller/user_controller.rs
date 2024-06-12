@@ -10,11 +10,11 @@ use wiretun::{Cidr, Device, UdpTransport};
 use crate::database::postgres;
 use crate::database::postgres::check_email_and_password_valid;
 use crate::errors::pg_errors::MyError;
-use crate::model::ip::{AddIpBdd, AddIpRequest};
-use crate::model::user::{AddUserBdd, UserClaims};
-use crate::model::user::UserLoginRequest;
-use crate::model::user::UserSignUpRequest;
-use crate::service::user_service::get_user_by_email;
+use crate::models::ip::{AddIpBdd, AddIpRequest};
+use crate::models::user::{AddUserBdd, UserClaims, UserInformationResponse};
+use crate::models::user::UserLoginRequest;
+use crate::models::user::UserSignUpRequest;
+use crate::service::user_service::{get_user_by_email, get_user_by_id};
 use crate::utils::{base64utils::encode_base64, key_generation_utils::generate_keys};
 use crate::utils::base64utils::parse_key_str;
 use crate::utils::tunneling_utils::StubTun;
@@ -24,6 +24,24 @@ pub async fn keys() -> Result<HttpResponse, Error> {
     let (pub_key, priv_key) = generate_keys();
     println!("{} {}", encode_base64(pub_key), encode_base64(priv_key));
     Ok(HttpResponse::Ok().body("working"))
+}
+
+#[get("/user/informations")]
+pub async fn get_necessary_informations(
+    user_claims: UserClaims,
+    db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
+    let user = match get_user_by_id(db_pool.clone(), user_claims.id).await {
+        Ok(user) => user,
+        Err(_) => return Ok(HttpResponse::NotFound().json("User not found")),
+    };
+
+    let user_response: UserInformationResponse = UserInformationResponse {
+        email: user.email,
+        public_key: user.public_key,
+        private_key: user.private_key,
+    };
+
+    Ok(HttpResponse::Ok().json(user_response))
 }
 
 #[post("/login")]
@@ -102,10 +120,7 @@ async fn add_ip_to_peer(
         Err(_) => return Ok(HttpResponse::NotFound().json("User not found")),
     };
 
-    let public_key_str = match user.public_key {
-        Some(pk) => pk,
-        None => return Ok(HttpResponse::NotFound().json("User does not have a public key")),
-    };
+    let public_key_str = user.public_key;
 
     let public_key = match parse_key_str(&public_key_str) {
         Ok(key) => key,

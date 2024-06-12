@@ -13,8 +13,8 @@ use ed25519_compact::KeyPair;
 use jwt_compact::alg::Ed25519;
 use tokio_postgres::NoTls;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use vpn::controller::user_controller::{add_ip_to_peer, keys, login, signup};
-use vpn::model::user::UserClaims;
+use vpn::controller::user_controller::{add_ip_to_peer, get_necessary_informations, keys, login, signup};
+use vpn::models::user::UserClaims;
 use wiretun::{Cidr, Device, DeviceConfig, PeerConfig};
 
 use config::ExampleConfig;
@@ -81,6 +81,7 @@ async fn main() -> std::io::Result<()> {
                     authority,
                     web::scope("")
                         .service(add_ip_to_peer)
+                        .service(get_necessary_informations)
                         .service(keys)
                         .use_state_guard(
                             |user: UserClaims| async move {
