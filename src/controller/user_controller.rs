@@ -1,24 +1,25 @@
 use std::sync::Arc;
 
 use actix_jwt_auth_middleware::{AuthResult, TokenSigner};
-use actix_web::{Error, get, HttpResponse, post, web};
+use actix_web::{get, post, web, Error, HttpResponse};
 use deadpool_postgres::Client;
 use deadpool_postgres::Pool;
 use jwt_compact::alg::Ed25519;
-use wiretun::{Cidr, Device, UdpTransport};
 use wiretun::noise::crypto::PublicKey;
+use wiretun::{Cidr, Device, UdpTransport};
+use x25519_dalek::StaticSecret;
 
 use crate::database::postgres;
 use crate::database::postgres::check_email_and_password_valid;
 use crate::errors::pg_errors::MyError;
 use crate::models::ip::{AddIpBdd, AddIpRequest};
-use crate::models::user::{AddUserBdd, UserClaims, UserInformationResponse};
 use crate::models::user::UserLoginRequest;
 use crate::models::user::UserSignUpRequest;
+use crate::models::user::{AddUserBdd, UserClaims, UserInformationResponse};
 use crate::service::user_service::{get_user_by_email, get_user_by_id};
-use crate::utils::{base64utils::encode_base64, key_generation_utils::generate_keys};
 use crate::utils::base64utils::decode_base64;
 use crate::utils::tunneling_utils::StubTun;
+use crate::utils::{base64utils::encode_base64, key_generation_utils::generate_keys};
 
 #[get("/user/keys")]
 pub async fn keys() -> Result<HttpResponse, Error> {
@@ -31,14 +32,17 @@ pub async fn keys() -> Result<HttpResponse, Error> {
 pub async fn get_necessary_informations(
     device: web::Data<Arc<Device<StubTun, UdpTransport>>>,
     user_claims: UserClaims,
-    db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
+    db_pool: web::Data<Pool>,
+) -> Result<HttpResponse, Error> {
     let user = match get_user_by_id(db_pool.clone(), user_claims.id).await {
         Ok(user) => user,
         Err(_) => return Ok(HttpResponse::NotFound().json("User not found")),
     };
 
     let device_ref = device.get_ref();
-    let device_public_key_str = PublicKey::from(device_ref.control().config().private_key);
+    let device_public_key_str = PublicKey::from(&StaticSecret::from(
+        device_ref.control().config().private_key,
+    ));
 
     let user_response: UserInformationResponse = UserInformationResponse {
         email: user.email,
