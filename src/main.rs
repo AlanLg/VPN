@@ -1,3 +1,4 @@
+use std::net::{Ipv4Addr, SocketAddrV4};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -52,6 +53,10 @@ async fn main() -> std::io::Result<()> {
         .peer(
             PeerConfig::default()
                 .public_key(peer_public_key().unwrap())
+                .endpoint(std::net::SocketAddr::V4(SocketAddrV4::new(
+                    Ipv4Addr::new(100, 121, 154, 200),
+                    51820,
+                )))
                 .allowed_ip("10.0.0.1".parse::<Cidr>().unwrap()),
         );
 
