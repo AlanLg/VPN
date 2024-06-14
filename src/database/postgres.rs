@@ -29,7 +29,6 @@ pub async fn check_email_and_password_valid(
     let stmt = include_str!("../../sql/check_user_password_valid.sql");
     println!("statement: {}", stmt);
     let stmt = client.prepare(&stmt).await.unwrap();
-
     client
         .query_one(&stmt, &[&user_info.email, &user_info.password])
         .await

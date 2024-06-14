@@ -54,6 +54,7 @@ async fn main() -> std::io::Result<()> {
                 .public_key(peer_public_key().unwrap())
                 .allowed_ip("10.0.0.1".parse::<Cidr>().unwrap()),
         );
+
     let tun = StubTun::new();
     let device = Arc::new(Device::with_udp(tun, cfg).await.unwrap());
     let KeyPair {
