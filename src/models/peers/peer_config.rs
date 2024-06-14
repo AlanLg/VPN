@@ -21,4 +21,6 @@ pub struct PeerDeleteRequest {
 #[derive(Deserialize)]
 pub struct CreatePeerRequest {
     pub email: String,
+    pub ip: String,
+    pub port: String,
 }

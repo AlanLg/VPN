@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -86,10 +87,22 @@ async fn create_peer(
         Err(error_response) => return Ok(error_response),
     };
 
+    let ip: Ipv4Addr = match req.ip.parse() {
+        Ok(ip) => ip,
+        Err(_) => return Ok(HttpResponse::BadRequest().json("Invalid IP address")),
+    };
+
+    let port: u16 = match req.port.parse() {
+        Ok(port) => port,
+        Err(_) => return Ok(HttpResponse::BadRequest().json("Invalid port number")),
+    };
+
+    let endpoint = Some(SocketAddr::V4(SocketAddrV4::new(ip, port)));
+
     let peer_config = PeerConfig {
         public_key,
         allowed_ips: hash_set_ips,
-        endpoint: None,
+        endpoint,
         preshared_key: None,
         persistent_keepalive: None,
     };
